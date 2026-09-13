@@ -42,11 +42,16 @@ async function withGuard(fn) {
     return await fn();
   } catch (e) {
     console.error(e);
-    if (String(e.message || '').includes('401')) {
+    const msg = String(e.message || '');
+    if (msg.includes('401')) {
       toast('Session expirée, reconnecte-toi.');
       Auth.signOut();
+    } else if (msg.includes('403')) {
+      toast("Accès refusé : reconnecte-toi et accepte bien toutes les autorisations Google (mail + agenda).");
+    } else if (msg === 'not-signed-in') {
+      toast('Pas encore connecté, reconnecte-toi.');
     } else {
-      toast("Erreur réseau, réessaie.");
+      toast(`Erreur : ${msg.slice(0, 120) || 'réessaie.'}`);
     }
     return null;
   }
